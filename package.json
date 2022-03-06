@@ -1,0 +1,23 @@
+{
+  "name": "iplaywordle",
+  "version": "1.0.0",
+  "description": "I Play Wordle",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.26.0",
+    "browser-run": "^10.1.0",
+    "concat-stream": "^1.6.2",
+    "dotenv": "^16.0.0",
+    "form-data": "^4.0.0",
+    "http": "^0.0.1-security",
+    "node-fetch": "^3.2.0",
+    "node-localstorage": "^2.2.1",
+    "puppeteer-core": "^13.4.0",
+    "vm": "^0.1.0"
+  }
+}
