@@ -1,7 +1,7 @@
 require('dotenv').config();
-
 const pup = require('puppeteer-core');
 const fs = require('fs');
+const TwitterApi = require('twitter-api-v2').default;
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 var nScreenshot = 0;
@@ -20,6 +20,7 @@ const wrapPromise = (promise, delay, reason) =>
 
 
 (async function () {
+
     let done = false;
     for (let i = 1; i <= 3; i++) {
         await console.log("==================== ATTEMPT " + i + " ====================");
@@ -220,6 +221,7 @@ async function main() {
 
     await console.log("Sharing on Facebook...")
     await shareOnFacebook(info);
+    await shareOnTwitter(info);
 
     //console.log(info);
 }
@@ -361,6 +363,40 @@ function getAsciiWords(text) {
     });
 }
 
+function getSocialPostText(info, short) {
+    if (short === undefined) short = false;
+
+    var text = shareText;
+    text += "\n\n" + (new Date()).toString()+"\n";
+    if (!short) {
+        text += "\n *** SPOILER ALERT\n";
+        text += "\n *** SOLUTION BELOW\n";
+        text += "\n *** Scroll with caution...\n";
+    }
+    else {
+        //text += "\n * SPOILER ALERT - SOLUTION BELOW *\n";
+    }
+
+    if (!short) {
+        for (var i = 0; i < (short ? 50 : 100); i++) text += ".\n";
+        text += "Solution was: '" + info.solution + "'\n";
+        for (var i = 0; i < (short ? 50 : 100); i++) text += ".\n";
+    }
+
+
+    if (!short) {
+        text += "\n *** Scroll with caution...\n";
+        text += "\n *** SOLUTION ABOVE\n";
+        text += "\n *** SPOILER ALERT\n";
+    }
+    else {
+        //text += "\n * SPOILER ALERT - SOLUTION ABOVE *\n";
+    }
+
+
+    return text;
+}
+
 async function shareOnFacebook(info) {
     //await console.log("WARNING: not posting on facebook because I don't want to!");
     //return;
@@ -368,17 +404,7 @@ async function shareOnFacebook(info) {
     const axios = require('axios');
     const FormData = require('form-data');
 
-    var text = shareText;
-    text += "\n" + (new Date()).toString()+"\n";
-    text += "\n *** SPOILER ALERT\n";
-    text += "\n *** SOLUTION BELOW\n";
-    text += "\n *** Scroll with caution...\n";
-    for (var i = 0; i < 100; i++) text += ".\n";
-    text += "Solution was: '" + info.solution + "'\n";
-    for (var i = 0; i < 100; i++) text += ".\n";
-    text += "\n *** Scroll with caution...\n";
-    text += "\n *** SOLUTION ABOVE\n";
-    text += "\n *** SPOILER ALERT\n";
+    let text = getSocialPostText(info);
 
     const data = new FormData();
     data.append('message', text);
@@ -393,4 +419,22 @@ async function shareOnFacebook(info) {
     );
 
     await console.log("Posted on Facebook.", res.data);
+}
+
+async function shareOnTwitter(info) {
+    try {
+        const twitterClient = new TwitterApi({
+            appKey: process.env.TWITTER_API_KEY,
+            appSecret: process.env.TWITTER_API_SECRET,
+            accessToken: process.env.TWITTER_ACCESS_TOKEN,
+            accessSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET
+        });
+
+        var xxx = await twitterClient.v1.tweet(getSocialPostText(info, true));
+
+        console.log("Posted on Twitter", xxx);
+    } catch (e) {
+        console.log("ERROR Share on twitter failed: ", e);
+    }
+
 }
